@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mb-3">Uploaded Data</h2>
+        <div  class="border p-3 rounded mb-3">
+            <h5 class="border-bottom pb-2">Filter</h5>
+            <form action="{{ url_for('filter_') }}" method="post" class="row g-3">
+                <div class="col-md-6">
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-auto">
+                            <label for="inputPassword6" class="col-form-label">Customs Office</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="text" id="inputPassword6" class="form-control" placeholder="Customs Office" name="customs_office">
+                        </div>
+                    </div>
+                    <fieldset class="row mb-3">
+                        <legend class="col-form-label col-sm-2 pt-0">Processing Status</legend>
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="Verified">
+                                <label class="form-check-label" for="gridRadios1">
+                                Verified
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="Assessed">
+                                <label class="form-check-label" for="gridRadios2">
+                                Assessed
+                                </label>
+                            </div>
+                            <div class="form-check disabled">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="BOE Released">
+                                <label class="form-check-label" for="gridRadios3">
+                                BOE Released
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="col-md-6">
+                    <div class="row g-3">
+                        <div class="col-auto">
+                            <div class="mb-3">
+                                <label for="calendar">Select Date:</label>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" id="calendar" name="date">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-secondary mb-3">Submit</button>
+                </div>
+            </form>
+            <a href="{{ url_for('download', customs_office=request.args.get('customs_office'), processing_status=request.args.get('processing_status'), date=request.args.get('date')) }}"
+                class="btn btn-success">Download</a>
+        </div>
+
+        {% if data.items %}
+            <table class="table table-bordered table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">BOE No.</th>
+                        <th scope="col">Customs Office</th>
+                        <th scope="col">Declaration Date</th>
+                        <th scope="col">Processing Status</th>
+                        <th scope="col">Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data.items %}
+                        <tr>
+                            <td>{{ row.BOE_No }}</td>
+                            <td>{{ row.Customs_Office }}</td>
+                            <td>{{ row.Declaration_Date.strftime('%d-%m-%Y') }}</td>
+                            <td>{{ row.Processing_Status }}</td>
+                            <td>{{ row.Due_Date.strftime('%d-%m-%Y') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination">
+                    {% if data.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('filter_', page=data.prev_num, customs_office=request.args.get('customs_office', ''), processing_status=request.args.get('processing_status', ''), date=request.args.get('date', '')) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    {% for num in data.iter_pages() %}
+                        {% if num %}
+                            <li class="page-item {% if num == data.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('filter_', page=num, customs_office=request.args.get('customs_office', ''), processing_status=request.args.get('processing_status', ''), date=request.args.get('date', '')) }}">{{ num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if data.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('filter_', page=data.next_num, customs_office=request.args.get('customs_office', ''), processing_status=request.args.get('processing_status', ''), date=request.args.get('date', '')) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+        {% else %}
+            <p>No data available. Please upload an Excel file.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        // Initialize the date picker
+        flatpickr("#calendar", {
+            dateFormat: "Y-m-d",  // YYYY-MM-DD format
+            altInput: true,
+            altFormat: "F j, Y",  // Example: January 1, 2025
+            allowInput: true
+        });
+    </script>
+{% endblock %}

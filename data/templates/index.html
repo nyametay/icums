@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Upload an Excel File</h2>
+
+
+        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="excel_file" class="form-control mb-3" accept=".xls, .xlsx">
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+
+        <hr>
+
+        {% if status == 'empty' %}
+            <h4 class="text-muted">No Data Uploaded Yet</h4>
+        {% endif %}
+
+    </div>
+{% endblock %}
